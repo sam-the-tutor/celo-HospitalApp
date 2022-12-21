@@ -226,8 +226,8 @@ contract HospitalApp{
         uint _goal) 
                   public{
 
-                    currentStatus = Statuses.Active;
-                    fundraise[projectLength] = Fundraise(payable(msg.sender), _title, _description, _image, _goal, 0, 0);
+                   uint pStatus = 0;
+                    fundraise[projectLength] = Fundraise(payable(msg.sender), _title, _description, _image, _goal, 0, pStatus);
                     emit projectCreated(msg.sender,_title);
                     projectLength++;
     }
@@ -253,8 +253,6 @@ contract HospitalApp{
     //function to contribute to a fundraising project. 
 
     function contribute(uint _id, uint _amount) public payable{
-        // This requirement ensures the sender has sent the amount specified to the owner of the request, if the transaction fails, the next line won't run
-        //remeber to change cUsd to the real variable.
 
         require(IERC20Token(cUsdTokenAddress)
             .transferFrom(msg.sender, fundraise[_id].owner, _amount), "Transaction failed, please try again.");
@@ -271,16 +269,5 @@ contract HospitalApp{
             fundraise[_id].pStatus = 1;
         }
     }
-
-
-
-
-
-
-
-
-
-
-
 
 }
