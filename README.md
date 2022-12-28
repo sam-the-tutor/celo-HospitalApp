@@ -1,9 +1,9 @@
 
 # Hospital Dapp
-link 4 Demo: https://sam-the-tutor.github.io/celo-HospitalApp/
+link: https://sam-the-tutor.github.io/celo-HospitalApp/
 
 
-### Description
+#### Description
 This is a very simple hospital dapp where:
 1. patients who need help can be registered, so as they recieve donations.
 2. hospitals can organize fundraising for their projects.
