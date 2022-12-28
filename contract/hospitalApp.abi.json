@@ -18,6 +18,37 @@
 			{
 				"indexed": true,
 				"internalType": "address",
+				"name": "donationFrom",
+				"type": "address"
+			},
+			{
+				"indexed": true,
+				"internalType": "string",
+				"name": "_name",
+				"type": "string"
+			},
+			{
+				"indexed": false,
+				"internalType": "uint256",
+				"name": "amount",
+				"type": "uint256"
+			},
+			{
+				"indexed": false,
+				"internalType": "uint256",
+				"name": "timeOfDonation",
+				"type": "uint256"
+			}
+		],
+		"name": "donation",
+		"type": "event"
+	},
+	{
+		"anonymous": false,
+		"inputs": [
+			{
+				"indexed": true,
+				"internalType": "address",
 				"name": "projectOwner",
 				"type": "address"
 			},
@@ -39,7 +70,7 @@
 				"type": "uint256"
 			}
 		],
-		"name": "clearPatient",
+		"name": "buyPatient",
 		"outputs": [],
 		"stateMutability": "payable",
 		"type": "function"
@@ -63,32 +94,6 @@
 		"type": "function"
 	},
 	{
-		"inputs": [],
-		"name": "getPatientCleared",
-		"outputs": [
-			{
-				"internalType": "uint256",
-				"name": "",
-				"type": "uint256"
-			}
-		],
-		"stateMutability": "view",
-		"type": "function"
-	},
-	{
-		"inputs": [],
-		"name": "getPatientLength",
-		"outputs": [
-			{
-				"internalType": "uint256",
-				"name": "",
-				"type": "uint256"
-			}
-		],
-		"stateMutability": "view",
-		"type": "function"
-	},
-	{
 		"inputs": [
 			{
 				"internalType": "uint256",
@@ -96,7 +101,7 @@
 				"type": "uint256"
 			}
 		],
-		"name": "getProjectDetails",
+		"name": "getAllProjects",
 		"outputs": [
 			{
 				"internalType": "address payable",
@@ -129,6 +134,19 @@
 				"type": "uint256"
 			},
 			{
+				"internalType": "bool",
+				"name": "",
+				"type": "bool"
+			}
+		],
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"inputs": [],
+		"name": "getpatientsLength",
+		"outputs": [
+			{
 				"internalType": "uint256",
 				"name": "",
 				"type": "uint256"
@@ -146,12 +164,12 @@
 			},
 			{
 				"internalType": "string",
-				"name": "_description",
+				"name": "_image",
 				"type": "string"
 			},
 			{
 				"internalType": "string",
-				"name": "_image",
+				"name": "_description",
 				"type": "string"
 			},
 			{
@@ -189,46 +207,39 @@
 		"name": "readPatient",
 		"outputs": [
 			{
-				"components": [
-					{
-						"internalType": "address payable",
-						"name": "owner",
-						"type": "address"
-					},
-					{
-						"internalType": "string",
-						"name": "name",
-						"type": "string"
-					},
-					{
-						"internalType": "string",
-						"name": "image",
-						"type": "string"
-					},
-					{
-						"internalType": "string",
-						"name": "hospital",
-						"type": "string"
-					},
-					{
-						"internalType": "string",
-						"name": "description",
-						"type": "string"
-					},
-					{
-						"internalType": "uint256",
-						"name": "price",
-						"type": "uint256"
-					},
-					{
-						"internalType": "uint256",
-						"name": "cleared",
-						"type": "uint256"
-					}
-				],
-				"internalType": "struct HospitalApp.Patient",
+				"internalType": "address payable",
 				"name": "",
-				"type": "tuple"
+				"type": "address"
+			},
+			{
+				"internalType": "string",
+				"name": "",
+				"type": "string"
+			},
+			{
+				"internalType": "string",
+				"name": "",
+				"type": "string"
+			},
+			{
+				"internalType": "string",
+				"name": "",
+				"type": "string"
+			},
+			{
+				"internalType": "string",
+				"name": "",
+				"type": "string"
+			},
+			{
+				"internalType": "uint256",
+				"name": "",
+				"type": "uint256"
+			},
+			{
+				"internalType": "bool",
+				"name": "",
+				"type": "bool"
 			}
 		],
 		"stateMutability": "view",
@@ -287,12 +298,12 @@
 			},
 			{
 				"internalType": "string",
-				"name": "_hospital",
+				"name": "_description",
 				"type": "string"
 			},
 			{
 				"internalType": "string",
-				"name": "_description",
+				"name": "_hospital",
 				"type": "string"
 			},
 			{
@@ -301,7 +312,7 @@
 				"type": "uint256"
 			}
 		],
-		"name": "writePatient",
+		"name": "writeProduct",
 		"outputs": [],
 		"stateMutability": "nonpayable",
 		"type": "function"
