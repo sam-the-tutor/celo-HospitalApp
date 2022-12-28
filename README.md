@@ -1,6 +1,7 @@
 
 # Hospital Dapp
 
+
 ## Description
 This is a very simple hospital dapp where:
 1. patients who need help can be registered, so as they recieve donations.
@@ -11,6 +12,8 @@ This is a very simple hospital dapp where:
 6. A project or patient can be deleted if the owner wishes to.
 7. funded projects close automatically.
 8.patients who recieve their full donations are delisted automatically.
+
+
 
 
 
