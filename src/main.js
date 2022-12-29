@@ -175,10 +175,35 @@ document
 //when the window loads for the first time
 window.addEventListener('load', async () => {
   notification("⌛ Loading...")
+  homepage()
   await connectCeloWallet()
   await getBalance()
   notificationOff()
 });
+
+
+
+
+
+function homepage(){
+  document.getElementById("marketplace").innerHTML = ""
+  const newImg = document.createElement("img")
+  newImg.src = "https://i.ibb.co/RCpxYgC/hd.webp"
+  document.getElementById("marketplace").appendChild(newImg)
+
+}
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 //get balance form the smart contract
@@ -276,26 +301,25 @@ function renderProjects() {
    
 
 //project template for display
-function projectTemplate2(_request) {
+function projectTemplate2(_project) {
   return `
 <div class="card mb-4 border">
-          <h3 class="card-title fs-3 fw-bold mt-2">${_request.title}</h3>
+          <h3 class="card-title fs-3 fw-bold mt-2">${_project.title}</h3>
         
         <div class="position-absolute top-0 end-0 px-2 py-1">
-            <a type="button" class="btn-close border deleteBtn" id="del${_request.index}" data-index="${_request.index}" style="background-color: #222222;"></a>
         </div>
         <div class="card-body text-left p-4 position-relative">
-              <img class="card-img-top" src="${_request.image}" alt="'${_request.title}', by ${_request.owner}">
+              <img class="card-img-top" src="${_project.image}" alt="'${_project.title}', by ${_project.owner}">
             
-            <p class="fw-bold border card-text mt-3 mb-2"  data-toggle="tooltip" title=${_request.description}>About the project.......</p>
-            <h5 class="fw-bold card-title mb-2">${_request.funded} of ${_request.goal/1000000000000000000} cUSD</h5>
+            <p class="fw-bold border card-text mt-3 mb-2"  data-toggle="tooltip" title=${_project.description}>About the project.......</p>
+            <h5 class="fw-bold card-title mb-2">${_project.funded/1000000000000000000} of ${_project.goal/1000000000000000000} cUSD</h5>
             <form>
                 <div class="col">
-                    <input type="text", id="quantity${_request.index}" class="form-control mb-2" placeholder="Amount...">
+                    <input type="text", id="quantity${_project.index}" class="form-control mb-2" placeholder="Amount...">
                 </div>
             </form>
             <div class="d-grid gap-1">
-                <a class="fw-bold btn btn-lg btn-outline-dark border donateBtn fs-6 p-3" id=${_request.index} style="background-color: #222222; color: #FFFFFF">Donate NOW!</a>
+                <a class="fw-bold btn btn-primary btn-outline-dark border donateBtn fs-6 p-3" id=${_project.index}  color: #FFFFFF">Contribute</a>
             </div>
         </div>
     </div>
