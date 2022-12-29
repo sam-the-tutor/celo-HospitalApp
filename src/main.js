@@ -6,7 +6,7 @@ import marketplaceAbi from '../contract/hospitalApp.abi.json'
 import erc20Abi from "../contract/erc20.abi.json"
 
 const ERC20_DECIMALS = 18
-const MPContractAddress = "0x51e5776B055aeEf079B02f34ADCabB0d4701DE0B"
+const MPContractAddress = "0xbd67bC01A6f636f6e255Ca80e0242355C44e231d"
 const cUSDContractAddress = "0x874069Fa1Eb16D44d622F2e0Ca25eeA172369bC1"
 
 let kit
@@ -30,7 +30,6 @@ const connectCeloWallet = async function () {
       kit.defaultAccount = accounts[0]
 
       contract = new kit.web3.eth.Contract(marketplaceAbi, MPContractAddress)
-      
       
     } catch (error) {
       notification(`⚠️ ${error}.`)
@@ -59,6 +58,7 @@ document.querySelector("#whitelistButton").addEventListener("click", async (e) =
         const result = await contract.methods
             .whitelistAddress()
             .send({ from: kit.defaultAccount })
+            notification("Your address has been whitelisted successfully.")
 
 
       }catch(error){
@@ -128,7 +128,7 @@ document
     notification(`⌛ Adding "${params[0]}"...`)
      try {
       const result = await contract.methods
-        .writeProduct(...params)
+        .writePatient(...params)
         .send({ from: kit.defaultAccount })
     } catch (error) {
       notification(`⚠️ ${error}.`)
@@ -171,7 +171,6 @@ document
 }
 
 
-
 //when the window loads for the first time
 window.addEventListener('load', async () => {
   notification("⌛ Loading...")
@@ -182,9 +181,7 @@ window.addEventListener('load', async () => {
 });
 
 
-
-
-
+//display the homepage image
 function homepage(){
   document.getElementById("marketplace").innerHTML = ""
   const newImg = document.createElement("img")
@@ -192,18 +189,6 @@ function homepage(){
   document.getElementById("marketplace").appendChild(newImg)
 
 }
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 //get balance form the smart contract
@@ -355,7 +340,7 @@ document
                 getBalance()
             }
             catch(error) {
-                notification(`⚠️ ${error}. ⚠️`)
+                notification("you cant contribute to your own project...")
                 throw "ErrorInNotification"
             }
         }
@@ -411,7 +396,7 @@ function donationTemplate(_donation) {
     <div class="card mb-4 bg-secondary text-white">
         <h2 class="card-title fs-4 fw-bold mt-2">${_donation.event}</h2>
         <p class="card-text mb-4" style="min-height: 10px">
-         Address: ${_donation.returnValues["_name"]}             
+         Address: <a href="https://explorer.celo.org/alfajores/tx/${_donation.transactionHash}">View Transaction</a>            
         </p>
         <p class="card-text mb-4" style="min-height: 10px">
          Amount: ${(_donation.returnValues["amount"]/(1000000000000000000))}  cUSD           

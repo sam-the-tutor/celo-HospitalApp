@@ -64,7 +64,7 @@ contract Marketplace {
 
     mapping (uint => Patient) internal patients;
 
-    function writeProduct(
+    function writePatient(
         string memory _name,
         string memory _image,
         string memory _description, 
@@ -105,11 +105,7 @@ contract Marketplace {
         );
     }
 
-
-  
-
-    
-    
+//function to clear thepatient's bills
     function buyPatient(uint _index) public payable {
         require(patients[_index].cleared == false,"Thank you, unfortunately, the patient has been cleared already.");
         require(
@@ -122,19 +118,11 @@ contract Marketplace {
         );
         patients[_index].cleared=true;
          emit donation(msg.sender,patients[_index].name, patients[_index].price, block.timestamp);
-
     }
-    
+    //get all the patients registered as of now
     function getpatientsLength() public view returns (uint) {
         return (patientsLength);
     }
-
-
-
-
-//****fundraising@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
-
-
 
 // Fundraise struct
     struct Fundraise
@@ -148,66 +136,54 @@ contract Marketplace {
         bool Ended;
     }
 
+
     //mapping for the fundraise struct
     mapping(uint => Fundraise) internal fundraise;
-
-
     
     /*modifier function to check whether owner of the project is 
     the same as one interacting with it currently
     */
-    modifier ownerOnly(uint _id)
-    {
+    modifier ownerOnly(uint _id){
         require(msg.sender == fundraise[_id].owner, "Sorry,you dont own this fundraising project");
         _;
     }
 
-
-    //event for the creation of a new project
-    event projectCreated(address indexed projectOwner, string indexed projectTitle);
-
-
-
-    // modifier function to delete/hide an already created fundraise project
+    //function to delete/hide an already created fundraise project
      function removeProject(uint _id) public ownerOnly(_id){
-
         fundraise[_id].Ended= true;
     }
 
-
     // get the total number of fundraising projects so far.
      function numbeOfProjects() public view returns(uint){
-        
         return projectLength;
     }
 
 
-    //function to create a new fundraising project
-
+    //Create a new fundraising project
     function newFundraise(
         string memory _title,
         string memory _image, 
         string memory _description, 
         uint _goal
         ) 
-                  public{
-                    bool _Ended = false;
-                    fundraise[projectLength] = Fundraise(
-                        payable(msg.sender), 
-                        _title,
-                        _image, 
-                        _description, 
-                         _goal, 
-                         0, 
-                         _Ended
-                         );
+         public{
+
+            bool _Ended = false;
+            fundraise[projectLength] = Fundraise(
+                payable(msg.sender), 
+                _title,
+                _image, 
+                _description, 
+                    _goal, 
+                    0, 
+                    _Ended
+         );
             
-                    projectLength++;
-                    }
+         projectLength++;
+    }
 
 
-    //function to get all the fundraising projects
-
+    //Get specific project with id
     function getAllProjects(uint _id) public view returns(address payable,  string memory, string memory, string memory, uint, uint, bool) {
     
         return (
@@ -218,33 +194,26 @@ contract Marketplace {
             fundraise[_id].goal, 
             fundraise[_id].funded, 
             fundraise[_id].Ended
-        
         );
     }
 
 
-    //function to contribute to a fundraising project. 
-
-    function contribute(uint _id, uint _amount) public payable{
-        // This requirement ensures the sender has sent the amount specified to the owner of the request, if the transaction fails, the next line won't run
-        //remeber to change cUsd to the real variable.
-
+    //Contribute to a fundraising project. 
+    function contribute(uint _id, uint _amount)  public {
+        //the owner cant donate to themselves
+        require(msg.sender != fundraise[_id].owner, "you cant donate to your own project.");
+        //transfer the specified amount to the project owner
         require(IERC20Token(cUsdTokenAddress)
             .transferFrom(msg.sender, fundraise[_id].owner, _amount), "Transaction failed, please try again.");
-
-        // This part will only run if the transaction is successful, it keeps track of the total donated amount
-
+        //increment the project funds
         fundraise[_id].funded += _amount;
 
-        
-        
         if (fundraise[_id].funded >= fundraise[_id].goal){
-            
             fundraise[_id].Ended = true;
         }
+        //emit a donation event for the participant
+        emit donation(msg.sender, fundraise[_id].title, _amount, block.timestamp);
     }
-
-    emit donation(msg.sender, fundraise[_index].title, _amount, block.timestamp);
 
 }
 
