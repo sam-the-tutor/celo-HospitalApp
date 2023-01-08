@@ -6,14 +6,15 @@ import marketplaceAbi from '../contract/hospitalApp.abi.json'
 import erc20Abi from "../contract/erc20.abi.json"
 
 const ERC20_DECIMALS = 18
-const MPContractAddress = "0xbd67bC01A6f636f6e255Ca80e0242355C44e231d"
+const ER = (10^18)
+const MPContractAddress = "0xC5001D8f5a3771203f8d12aba69E28776EB62Aa8" //0xbd67bC01A6f636f6e255Ca80e0242355C44e231d"
 const cUSDContractAddress = "0x874069Fa1Eb16D44d622F2e0Ca25eeA172369bC1"
-
+//0xc0de27D30BE002eD7547310D54FC6D6EE3799a86
 let kit
 let contract
 let accounts
 let donations
-let products = []
+let patients = []
 let projects = []
 
 
@@ -51,6 +52,7 @@ async function approve(_price) {
         return result
       }
 
+
 //add an address to the whitelist
 document.querySelector("#whitelistButton").addEventListener("click", async (e) => {
       try{
@@ -73,20 +75,20 @@ document.querySelector("#marketplace").addEventListener("click", async (e) => {
     const index = e.target.id
     notification("⌛ Waiting for payment approval...")
     try {
-      await approve(products[index].price)
+      await approve(patients[index].price)
     } catch (error) {
       notification(`⚠️ ${error}.`)
     }
-       notification(`⌛ Awaiting payment for "${products[index].name}"...`)
+       notification(`⌛ Awaiting payment for "${patients[index].name}"...`)
     try {
       const result = await contract.methods
         .buyPatient(index)
         .send({ from: kit.defaultAccount })
-      notification(`🎉 You successfully bought "${products[index].name}".`)
+      notification(`🎉 You successfully paid for "${patients[index].name}".`)
       getPatients()
       getBalance()
     } catch (error) {
-      notification("Sorry, the patient has already been cleared. you can pay for another one")
+      notification("Sorry, you cant pay for your own patient..")
     }
   }
 })
@@ -94,15 +96,15 @@ document.querySelector("#marketplace").addEventListener("click", async (e) => {
 
 //load patients from the smart contract
 const getPatients = async function() {
-  products=[]
-  const _productsLength = await contract.methods.getpatientsLength().call()
-  for (let i = 0; i < _productsLength; i++) {
+  patients=[]
+  const _patientsLength = await contract.methods.getpatientsLength().call()
+  for (let i = 0; i < _patientsLength; i++) {
 
     let r = await contract.methods.readPatient(i).call() // Call the requestData function for every request
         if(r[6] == false)
         {
             // Push a request to the list ONLY if it's marked as active
-            products.push({index: i, owner: r[0], name: r[1], image: r[2], description: r[3], hospital: r[4], price: r[5]})
+            patients.push({index: i, owner: r[0], name: r[1], image: r[2], description: r[3], hospital: r[4], price: r[5]})
         }
   renderPatients()
     }
@@ -125,17 +127,22 @@ document
       .shiftedBy(ERC20_DECIMALS)
       .toString()
     ]
+
     notification(`⌛ Adding "${params[0]}"...`)
+
      try {
       const result = await contract.methods
         .writePatient(...params)
         .send({ from: kit.defaultAccount })
+
+        notification(`🎉 You successfully added "${params[0]}".`)
+        patients=[]
+        getPatients()
     } catch (error) {
-      notification(`⚠️ ${error}.`)
+      notification(`⚠️ Patient not registered, try again later..`)
     }
-    notification(`🎉 You successfully added "${params[0]}".`)
-    products=[]
-    getPatients()
+
+    
   })
 
 
@@ -201,7 +208,7 @@ const getBalance = async function () {
 //render the patients
 function renderPatients() {
   document.getElementById("marketplace").innerHTML = ""
-  products.forEach((_product) => {
+  patients.forEach((_product) => {
     const newDiv = document.createElement("div")
     newDiv.className = "col-md-4"
     newDiv.innerHTML = productTemplate(_product)
@@ -247,12 +254,14 @@ document
       const result = await contract.methods
         .newFundraise(...params)
         .send({ from: kit.defaultAccount })
+
+        notification(`🎉 You successfully added "${params[0]}".`)
+        projects =[]
+        getProjects()
     } catch (error) {
-      notification(`⚠️ ${error}.`)
+      notification(`⚠️ Project not registered, try again later.`)
     }
-    notification(`🎉 You successfully added "${params[0]}".`)
-    projects =[]
-    getProjects()
+    
   })
 
 
@@ -399,7 +408,7 @@ function donationTemplate(_donation) {
          Address: <a href="https://explorer.celo.org/alfajores/tx/${_donation.transactionHash}">View Transaction</a>            
         </p>
         <p class="card-text mb-4" style="min-height: 10px">
-         Amount: ${(_donation.returnValues["amount"]/(1000000000000000000))}  cUSD           
+         Amount: ${(_donation.returnValues["amount"]/1000000000000000000)}  cUSD           
         </p>
         <p class="card-text mb-4" style="min-height: 10px">
          Date: ${getDate(_donation.returnValues["timeOfDonation"])}             

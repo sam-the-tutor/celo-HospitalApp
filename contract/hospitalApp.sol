@@ -21,11 +21,15 @@ contract Marketplace {
     address internal cUsdTokenAddress = 0x874069Fa1Eb16D44d622F2e0Ca25eeA172369bC1;
 
 
-        /// track addresses if whitelisted or not
+    // track addresses if whitelisted or not
      mapping(address => bool) public whitelistedAddresses;
 
-    /// an array to hold whitelisted addresses
-    address[] whitelistedAddress;
+    //mapping a patient struct.
+     mapping (uint => Patient) internal patients;
+
+
+    // an array to hold whitelisted addresses
+     address[] whitelistedAddress;
 
 
     //when an address is whitelisted.
@@ -46,11 +50,10 @@ contract Marketplace {
 
 
      modifier InWhitelist(){
-                require(whitelistedAddresses[msg.sender] == true, "not whitelisted");
+                require(whitelistedAddresses[msg.sender], "not whitelisted");
                 _;
-
-
     }
+
 
     struct Patient {
         address payable owner;
@@ -62,15 +65,18 @@ contract Marketplace {
         bool cleared;
     }
 
-    mapping (uint => Patient) internal patients;
+    
 
     function writePatient(
-        string memory _name,
-        string memory _image,
-        string memory _description, 
-        string memory _hospital, 
+        string calldata _name,
+        string calldata _image,
+        string calldata _description, 
+        string calldata _hospital, 
         uint _price
-    ) public InWhitelist{
+
+    ) 
+    public InWhitelist
+    {
         bool _cleared = false;
         patients[patientsLength] = Patient(
             payable(msg.sender),
@@ -85,6 +91,7 @@ contract Marketplace {
        
     }
 
+//read patient details in a specific index
     function readPatient(uint _index) public view returns (
         address payable,
         string memory, 
@@ -124,7 +131,8 @@ contract Marketplace {
         return (patientsLength);
     }
 
-// Fundraise struct
+
+// struct to organize fundraising details
     struct Fundraise
     {
         address payable owner;
@@ -140,9 +148,9 @@ contract Marketplace {
     //mapping for the fundraise struct
     mapping(uint => Fundraise) internal fundraise;
     
-    /*modifier function to check whether owner of the project is 
-    the same as one interacting with it currently
-    */
+    //modifier function to check whether owner of the project is 
+    //the same as one interacting with it currently
+    
     modifier ownerOnly(uint _id){
         require(msg.sender == fundraise[_id].owner, "Sorry,you dont own this fundraising project");
         _;
@@ -161,22 +169,23 @@ contract Marketplace {
 
     //Create a new fundraising project
     function newFundraise(
-        string memory _title,
-        string memory _image, 
-        string memory _description, 
+        string calldata _title,
+        string calldata _image, 
+        string calldata _description, 
         uint _goal
         ) 
-         public{
+         public InWhitelist
+         {
 
             bool _Ended = false;
             fundraise[projectLength] = Fundraise(
-                payable(msg.sender), 
-                _title,
-                _image, 
-                _description, 
-                    _goal, 
-                    0, 
-                    _Ended
+            payable(msg.sender), 
+            _title,
+            _image, 
+            _description, 
+            _goal, 
+             0, 
+            _Ended
          );
             
          projectLength++;
@@ -184,7 +193,19 @@ contract Marketplace {
 
 
     //Get specific project with id
-    function getAllProjects(uint _id) public view returns(address payable,  string memory, string memory, string memory, uint, uint, bool) {
+    function getAllProjects(uint _id) 
+    public view 
+
+    returns(
+        address payable,  
+        string memory, 
+        string memory, 
+        string memory, 
+        uint, 
+        uint, 
+        bool
+        ) 
+    {
     
         return (
             fundraise[_id].owner, 
@@ -198,13 +219,17 @@ contract Marketplace {
     }
 
 
+
     //Contribute to a fundraising project. 
     function contribute(uint _id, uint _amount)  public {
+
         //the owner cant donate to themselves
         require(msg.sender != fundraise[_id].owner, "you cant donate to your own project.");
+
         //transfer the specified amount to the project owner
         require(IERC20Token(cUsdTokenAddress)
             .transferFrom(msg.sender, fundraise[_id].owner, _amount), "Transaction failed, please try again.");
+        
         //increment the project funds
         fundraise[_id].funded += _amount;
 
