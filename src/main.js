@@ -16,6 +16,7 @@ let accounts
 let donations
 let patients = []
 let projects = []
+const loader = document.querySelector(".loader");
 
 
 const connectCeloWallet = async function () {
@@ -32,6 +33,16 @@ const connectCeloWallet = async function () {
 
       contract = new kit.web3.eth.Contract(marketplaceAbi, MPContractAddress)
       
+      // Check if account is whitelisted or not      
+      const isWhitelisted = await contract.methods.whitelistedAddresses(kit.defaultAccount).call();
+      if(isWhitelisted) {
+        const whitelistBtn = document.querySelector("#whitelistButton");
+        whitelistBtn.textContent = "Whitelisted"
+        whitelistBtn.setAttribute("disabled", "true");
+        whitelistBtn.classList.replace("btn-primary", "btn-success");
+      }
+
+
     } catch (error) {
       notification(`⚠️ ${error}.`)
     }
@@ -56,15 +67,20 @@ async function approve(_price) {
 //add an address to the whitelist
 document.querySelector("#whitelistButton").addEventListener("click", async (e) => {
       try{
-
-        const result = await contract.methods
+        const isWhitelisted = await contract.methods.whitelistedAddresses(kit.defaultAccount).call();
+        if(isWhitelisted) {
+          notification("Your address is already whitelisted");
+        } else {
+          loader.classList.replace("hide", "show");
+          const result = await contract.methods
             .whitelistAddress()
             .send({ from: kit.defaultAccount })
             notification("Your address has been whitelisted successfully.")
-
-
+          loader.classList.replace("show", "hide")
+        }
       }catch(error){
-      notification("Your Address is already whitelisted.")
+        loader.classList.replace("show", "hide")
+        notification("Trabsaction error, please check and try again...")
   }
 })
 
@@ -361,12 +377,15 @@ document
 document
   .querySelector("#myDonations")
   .addEventListener("click", async (e) => {
-    getDonations()
+    loader.classList.replace("hide", "show");
+    await getDonations();
+    loader.classList.replace("show", "hide");
   })
 
 
 //function to get donations
 async function getDonations(){
+  loader.classList.replace("hide", "show");
 donations = await  contract.getPastEvents('donation',{
     filter:{donationFrom:accounts[0]},
         fromBlock:0,
@@ -374,7 +393,8 @@ donations = await  contract.getPastEvents('donation',{
       },(err,events) =>{
             return events;
 })
-renderDonations()
+  await renderDonations()
+  loader.classList.replace("show", "hide");
 }
 
 
@@ -451,16 +471,20 @@ document
   document
   .querySelector("#loadPatients")
   .addEventListener("click", async () => {
+    loader.classList.replace("hide", "show");
     patientOff()
     await getPatients()
+    loader.classList.replace("show", "hide");
   })
 
  //display the projects
   document
   .querySelector("#loadProjects")
   .addEventListener("click", async () => {
+    loader.classList.replace("hide", "show");
     crowdOff()
     await getProjects()
+    loader.classList.replace("show", "hide");
   })
 
 

@@ -20,41 +20,6 @@ contract Marketplace {
     uint internal projectLength = 0;
     address internal cUsdTokenAddress = 0x874069Fa1Eb16D44d622F2e0Ca25eeA172369bC1;
 
-
-    // track addresses if whitelisted or not
-     mapping(address => bool) public whitelistedAddresses;
-
-    //mapping a patient struct.
-     mapping (uint => Patient) internal patients;
-
-
-    // an array to hold whitelisted addresses
-     address[] whitelistedAddress;
-
-
-    //when an address is whitelisted.
-    event addressWhitelisted(address indexed whitelistaddress);
-    event donation(address indexed donationFrom, string indexed _name, uint256 amount,uint256 timeOfDonation);
-
-
-     //adding an address to the whitelist array
-    function whitelistAddress() public {
-        //check whether the address is already whitelisted
-        require(!whitelistedAddresses[msg.sender], "Your Address is already whitelisted");
-        whitelistedAddresses[msg.sender] = true;
-
-        whitelistedAddress.push(msg.sender);
-
-        emit addressWhitelisted(msg.sender);
-    }
-
-
-     modifier InWhitelist(){
-                require(whitelistedAddresses[msg.sender], "not whitelisted");
-                _;
-    }
-
-
     struct Patient {
         address payable owner;
         string name;
@@ -64,8 +29,28 @@ contract Marketplace {
         uint price;
         bool cleared;
     }
+    //mapping a patient struct.
+     mapping (uint => Patient) internal patients;
 
-    
+    // track addresses if whitelisted or not
+    mapping(address => bool) public whitelistedAddresses;
+
+    //when an address is whitelisted.
+    event addressWhitelisted(address indexed whitelistaddress);
+    event donation(address indexed donationFrom, string indexed _name, uint256 amount,uint256 timeOfDonation);
+    modifier InWhitelist(){
+        require(whitelistedAddresses[msg.sender], "not whitelisted");
+        _;
+    }
+
+     //adding an address to the whitelist array
+    function whitelistAddress() public {
+        //check whether the address is already whitelisted
+        require(!whitelistedAddresses[msg.sender], "Your Address is already whitelisted");
+        whitelistedAddresses[msg.sender] = true;
+
+        emit addressWhitelisted(msg.sender);
+    }
 
     function writePatient(
         string calldata _name,
@@ -158,7 +143,7 @@ contract Marketplace {
 
     //function to delete/hide an already created fundraise project
      function removeProject(uint _id) public ownerOnly(_id){
-        fundraise[_id].Ended= true;
+        fundraise[_id].Ended = true;
     }
 
     // get the total number of fundraising projects so far.
@@ -241,8 +226,3 @@ contract Marketplace {
     }
 
 }
-
-
-
-
-
