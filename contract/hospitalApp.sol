@@ -22,7 +22,7 @@ contract Marketplace {
 
 
     // track addresses if whitelisted or not
-     mapping(address => bool) public whitelistedAddresses;
+     mapping(address => bool) public hasBeenWhiteListed;
 
     //mapping a patient struct.
      mapping (uint => Patient) internal patients;
@@ -40,8 +40,8 @@ contract Marketplace {
      //adding an address to the whitelist array
     function whitelistAddress() public {
         //check whether the address is already whitelisted
-        require(!whitelistedAddresses[msg.sender], "Your Address is already whitelisted");
-        whitelistedAddresses[msg.sender] = true;
+        require(!hasBeenWhiteListed[msg.sender], "Your Address is already whitelisted");
+        hasBeenWhiteListed[msg.sender] = true;
 
         whitelistedAddress.push(msg.sender);
 
@@ -50,7 +50,7 @@ contract Marketplace {
 
 
      modifier InWhitelist(){
-                require(whitelistedAddresses[msg.sender], "not whitelisted");
+                require(hasBeenWhiteListed[msg.sender], "not whitelisted");
                 _;
     }
 
@@ -77,6 +77,11 @@ contract Marketplace {
     ) 
     public InWhitelist
     {
+        require(bytes(_name).length > 0, "Invalid string");
+        require(bytes(_image).length > 0, "Invalid string");
+        require(bytes(_description).length > 0, "Invalid string");
+        require(bytes(_hospital).length > 0, "Invalid string");
+
         bool _cleared = false;
         patients[patientsLength] = Patient(
             payable(msg.sender),
@@ -101,34 +106,42 @@ contract Marketplace {
         uint, 
         bool
     ) {
+        Patient storage patient = patients[_index];
         return (
-            patients[_index].owner,
-            patients[_index].name, 
-            patients[_index].image, 
-            patients[_index].description, 
-            patients[_index].hospital, 
-            patients[_index].price,
-            patients[_index].cleared
+            patient.owner,
+            patient.name, 
+            patient.image, 
+            patient.description, 
+            patient.hospital, 
+            patient.price,
+            patient.cleared
         );
     }
 
 //function to clear thepatient's bills
-    function buyPatient(uint _index) public payable {
-        require(patients[_index].cleared == false,"Thank you, unfortunately, the patient has been cleared already.");
+    function clearPatientBill(uint _index) public payable {
+        Patient storage patient = patients[_index];
+        require (msg.sender != patient.owner, "Owner cannot help  patient");
+        require(patient.cleared == false,"Thank you, unfortunately, the patient has been cleared already.");
         require(
           IERC20Token(cUsdTokenAddress).transferFrom(
             msg.sender,
-            patients[_index].owner,
-            patients[_index].price
+            patient.owner,
+            patient.price
           ),
           "Transfer failed."
         );
-        patients[_index].cleared=true;
-         emit donation(msg.sender,patients[_index].name, patients[_index].price, block.timestamp);
+        patient.cleared=true;
+         emit donation(msg.sender,patient.name, patient.price, block.timestamp);
     }
     //get all the patients registered as of now
     function getpatientsLength() public view returns (uint) {
         return (patientsLength);
+    }
+
+
+    function getWhiteListAddresses() public view returns(address[] memory){
+        return whitelistedAddress;
     }
 
 
@@ -148,16 +161,9 @@ contract Marketplace {
     //mapping for the fundraise struct
     mapping(uint => Fundraise) internal fundraise;
     
-    //modifier function to check whether owner of the project is 
-    //the same as one interacting with it currently
-    
-    modifier ownerOnly(uint _id){
-        require(msg.sender == fundraise[_id].owner, "Sorry,you dont own this fundraising project");
-        _;
-    }
-
     //function to delete/hide an already created fundraise project
-     function removeProject(uint _id) public ownerOnly(_id){
+     function removeProject(uint _id) public {
+        require(msg.sender == fundraise[_id].owner, "Sorry,you dont own this fundraising project");
         fundraise[_id].Ended= true;
     }
 
@@ -176,6 +182,9 @@ contract Marketplace {
         ) 
          public InWhitelist
          {
+            require(bytes(_title).length > 0, "Invalid string");
+            require(bytes(_image).length > 0, "Invalid string");
+            require(bytes(_description).length > 0, "Invalid string");
 
             bool _Ended = false;
             fundraise[projectLength] = Fundraise(
@@ -206,15 +215,15 @@ contract Marketplace {
         bool
         ) 
     {
-    
+        Fundraise storage project = fundraise[_id];
         return (
-            fundraise[_id].owner, 
-            fundraise[_id].title, 
-            fundraise[_id].image,
-            fundraise[_id].description, 
-            fundraise[_id].goal, 
-            fundraise[_id].funded, 
-            fundraise[_id].Ended
+            project.owner, 
+            project.title, 
+            project.image,
+            project.description, 
+            project.goal, 
+            project.funded, 
+            project.Ended
         );
     }
 
