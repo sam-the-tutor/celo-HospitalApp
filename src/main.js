@@ -6,10 +6,10 @@ import marketplaceAbi from '../contract/hospitalApp.abi.json'
 import erc20Abi from "../contract/erc20.abi.json"
 
 const ERC20_DECIMALS = 18
-const ER = (10^18)
-const MPContractAddress = "0xC5001D8f5a3771203f8d12aba69E28776EB62Aa8" //0xbd67bC01A6f636f6e255Ca80e0242355C44e231d"
+
+const MPContractAddress = "0xE714eac49C3665697Ec8F9Ef3cfBB3604cbbbDc8"
 const cUSDContractAddress = "0x874069Fa1Eb16D44d622F2e0Ca25eeA172369bC1"
-//0xc0de27D30BE002eD7547310D54FC6D6EE3799a86
+
 let kit
 let contract
 let accounts
@@ -39,7 +39,6 @@ const connectCeloWallet = async function () {
     notification("⚠️ Please install the CeloExtensionWallet.")
   }
 }
-
 
 
 //approve the address to spend the specified amount
@@ -73,22 +72,29 @@ document.querySelector("#whitelistButton").addEventListener("click", async (e) =
 document.querySelector("#marketplace").addEventListener("click", async (e) => {
   if (e.target.className.includes("buyBtn")) {
     const index = e.target.id
+
     notification("⌛ Waiting for payment approval...")
+    const price = new BigNumber(patients[index].price)
+                    .shiftedBy(ERC20_DECIMALS)
+                    .toString()
+
+                    console.log("index and price:", price,index)
     try {
-      await approve(patients[index].price)
+      await approve(price)
     } catch (error) {
       notification(`⚠️ ${error}.`)
     }
        notification(`⌛ Awaiting payment for "${patients[index].name}"...`)
     try {
       const result = await contract.methods
-        .buyPatient(index)
+        .payPatientBills(index)
         .send({ from: kit.defaultAccount })
       notification(`🎉 You successfully paid for "${patients[index].name}".`)
       getPatients()
       getBalance()
     } catch (error) {
       notification("Sorry, you cant pay for your own patient..")
+      console.log("Please refresh the browser, the above error will go off")
     }
   }
 })
@@ -98,16 +104,18 @@ document.querySelector("#marketplace").addEventListener("click", async (e) => {
 const getPatients = async function() {
   patients=[]
   const _patientsLength = await contract.methods.getpatientsLength().call()
+  console.log(_patientsLength)
   for (let i = 0; i < _patientsLength; i++) {
 
-    let r = await contract.methods.readPatient(i).call() // Call the requestData function for every request
-        if(r[6] == false)
-        {
+    let r = await contract.methods.readPatient(i).call() 
+        
             // Push a request to the list ONLY if it's marked as active
             patients.push({index: i, owner: r[0], name: r[1], image: r[2], description: r[3], hospital: r[4], price: r[5]})
-        }
-  renderPatients()
+        
+  
     }
+    renderPatients()
+    console.log("patients:",patients)
 }
 
 
@@ -123,6 +131,7 @@ document
       document.getElementById("newImgUrl").value,
       document.getElementById("newPatientDescription").value,
       document.getElementById("newLocation").value,
+      document.getElementById("newPrice").value,
 
     ]
 
@@ -137,7 +146,7 @@ document
         patients=[]
         getPatients()
     } catch (error) {
-      notification(`⚠️ Patient not registered, try again later..`)
+      notification(`⚠️ ${error}`)
     }
 
     
@@ -145,30 +154,30 @@ document
 
 
 //patient to display template
-  function productTemplate(_product) {
+  function productTemplate(patient) {
   return `
     <div class="card mb-4">
-      <img class="card-img-top" src="${_product.image}" alt="...">
+      <img class="card-img-top" src="${patient.image}" alt="...">
       <div class="position-absolute top-0 end-0 bg-warning mt-4 px-2 py-1 rounded-start"> 
       </div>
       <div class="card-body text-left p-4 position-relative">
         <div class="translate-middle-y position-absolute top-0">
-        ${identiconTemplate(_product.owner)}
+        ${identiconTemplate(patient.owner)}
         </div>
-        <h2 class="card-title fs-4 fw-bold mt-2">${_product.name}</h2>
+        <h2 class="card-title fs-4 fw-bold mt-2">${patient.name}</h2>
         <p class="card-text mb-4" style="min-height: 82px">
-          ${_product.description}             
+          ${patient.description}             
         </p>
         <p class="card-text mt-4">
           <i class="bi bi-geo-alt-fill"></i>
-          <span>${_product.hospital}</span>
+          <span>${patient.hospital}</span>
         </p>
         <div class="d-grid gap-2">
-          <a class="btn btn-lg btn-outline-dark buyBtn fs-6 p-3" id=${
-            _product.index
+          <button class="btn btn-lg btn-outline-dark buyBtn fs-6 p-3" id=${
+            patient.index
           }>
-            Pay ${_product.price/1000000000000000000} cUSD
-          </a>
+            Pay ${patient.price} cUSD
+          </button>
         </div>
       </div>
     </div>
@@ -206,11 +215,14 @@ const getBalance = async function () {
 //render the patients
 function renderPatients() {
   document.getElementById("marketplace").innerHTML = ""
-  patients.forEach((_product) => {
+  patients.forEach((patient) => {
+    if(patient.owner != "0x0000000000000000000000000000000000000000"){
     const newDiv = document.createElement("div")
     newDiv.className = "col-md-4"
-    newDiv.innerHTML = productTemplate(_product)
+    newDiv.innerHTML = productTemplate(patient)
     document.getElementById("marketplace").appendChild(newDiv)
+  }
+
   })
 }
 
@@ -336,8 +348,7 @@ document
             }
             catch(error){
                 notification(`⚠️ ${error}. ⚠️`)
-                throw "ErrorInNotification"
-            }
+                console.log("first error:",error)            }
             notification(`⌛ Awaiting for payment of ${quantity} cUSD ⌛`)
             try{ 
                 const result = await contract.methods.contribute(index, quantity.shiftedBy(ERC20_DECIMALS))
@@ -348,7 +359,7 @@ document
             }
             catch(error) {
                 notification("you cant contribute to your own project...")
-                throw "ErrorInNotification"
+                console.log("Please refresh the browser, the above error will go off")
             }
         }
     })
@@ -406,7 +417,7 @@ function donationTemplate(_donation) {
          Address: <a href="https://explorer.celo.org/alfajores/tx/${_donation.transactionHash}">View Transaction</a>            
         </p>
         <p class="card-text mb-4" style="min-height: 10px">
-         Amount: ${(_donation.returnValues["amount"]/1000000000000000000)}  cUSD           
+         Amount: ${_donation.returnValues["amount"]}  cUSD           
         </p>
         <p class="card-text mb-4" style="min-height: 10px">
          Date: ${getDate(_donation.returnValues["timeOfDonation"])}             

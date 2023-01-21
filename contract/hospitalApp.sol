@@ -28,9 +28,6 @@ contract Marketplace {
      mapping (uint => Patient) internal patients;
 
 
-    // an array to hold whitelisted addresses
-     address[] whitelistedAddress;
-
 
     //when an address is whitelisted.
     event addressWhitelisted(address indexed whitelistaddress);
@@ -42,8 +39,6 @@ contract Marketplace {
         //check whether the address is already whitelisted
         require(!whitelistedAddresses[msg.sender], "Your Address is already whitelisted");
         whitelistedAddresses[msg.sender] = true;
-
-        whitelistedAddress.push(msg.sender);
 
         emit addressWhitelisted(msg.sender);
     }
@@ -113,8 +108,9 @@ contract Marketplace {
     }
 
 //function to clear thepatient's bills
-    function buyPatient(uint _index) public payable {
+    function payPatientBills(uint _index) public payable {
         require(patients[_index].cleared == false,"Thank you, unfortunately, the patient has been cleared already.");
+        require(msg.sender != patients[_index].owner, "you can clear your bills.");
         require(
           IERC20Token(cUsdTokenAddress).transferFrom(
             msg.sender,
@@ -123,8 +119,10 @@ contract Marketplace {
           ),
           "Transfer failed."
         );
-        patients[_index].cleared=true;
+        
          emit donation(msg.sender,patients[_index].name, patients[_index].price, block.timestamp);
+         delete patients[_index];
+
     }
     //get all the patients registered as of now
     function getpatientsLength() public view returns (uint) {
@@ -133,8 +131,7 @@ contract Marketplace {
 
 
 // struct to organize fundraising details
-    struct Fundraise
-    {
+    struct Fundraise{
         address payable owner;
         string title;
         string image;
@@ -156,10 +153,7 @@ contract Marketplace {
         _;
     }
 
-    //function to delete/hide an already created fundraise project
-     function removeProject(uint _id) public ownerOnly(_id){
-        fundraise[_id].Ended= true;
-    }
+    
 
     // get the total number of fundraising projects so far.
      function numbeOfProjects() public view returns(uint){
@@ -233,11 +227,14 @@ contract Marketplace {
         //increment the project funds
         fundraise[_id].funded += _amount;
 
-        if (fundraise[_id].funded >= fundraise[_id].goal){
-            fundraise[_id].Ended = true;
-        }
         //emit a donation event for the participant
         emit donation(msg.sender, fundraise[_id].title, _amount, block.timestamp);
+        
+        //delete the completed project
+        if (fundraise[_id].funded >= fundraise[_id].goal){
+           delete fundraise[_id];
+        }
+        
     }
 
 }
