@@ -7,7 +7,7 @@ import erc20Abi from "../contract/erc20.abi.json"
 
 const ERC20_DECIMALS = 18
 
-const MPContractAddress = "0xE714eac49C3665697Ec8F9Ef3cfBB3604cbbbDc8"
+const MPContractAddress = "0x9F6654619Fac3Ca99898990a31C3A4bc9B3795C0"
 const cUSDContractAddress = "0x874069Fa1Eb16D44d622F2e0Ca25eeA172369bC1"
 
 let kit
@@ -78,7 +78,7 @@ document.querySelector("#marketplace").addEventListener("click", async (e) => {
                     .shiftedBy(ERC20_DECIMALS)
                     .toString()
 
-                    console.log("index and price:", price,index)
+                    
     try {
       await approve(price)
     } catch (error) {
@@ -295,10 +295,12 @@ document
 function renderProjects() {
   document.getElementById("marketplace").innerHTML = ""
   projects.forEach((_project) => {
+    if(_project.owner != "0x0000000000000000000000000000000000000000"){
     const newDiv = document.createElement("div")
     newDiv.className = "col-md-4"
     newDiv.innerHTML = projectTemplate2(_project)
     document.getElementById("marketplace").appendChild(newDiv)
+  }
   })
 }
 
@@ -341,6 +343,8 @@ document
         if(e.target.className.includes("donateBtn"))
         {
             const index = e.target.id
+
+
             const quantity = new BigNumber(document.getElementById(`quantity${index}`).value)
             notification("⌛ Waiting for payment approval... ⌛")
             try{
@@ -417,7 +421,7 @@ function donationTemplate(_donation) {
          Address: <a href="https://explorer.celo.org/alfajores/tx/${_donation.transactionHash}">View Transaction</a>            
         </p>
         <p class="card-text mb-4" style="min-height: 10px">
-         Amount: ${_donation.returnValues["amount"]}  cUSD           
+         Amount: ${(_donation.returnValues["amount"]/1000000000000000000)}  cUSD           
         </p>
         <p class="card-text mb-4" style="min-height: 10px">
          Date: ${getDate(_donation.returnValues["timeOfDonation"])}             
