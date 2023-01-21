@@ -18,6 +18,7 @@ let patients = []
 let projects = []
 
 
+
 const connectCeloWallet = async function () {
   if (window.celo) {
     try {
