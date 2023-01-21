@@ -123,9 +123,7 @@ document
       document.getElementById("newImgUrl").value,
       document.getElementById("newPatientDescription").value,
       document.getElementById("newLocation").value,
-      new BigNumber(document.getElementById("newPrice").value)
-      .shiftedBy(ERC20_DECIMALS)
-      .toString()
+
     ]
 
     notification(`⌛ Adding "${params[0]}"...`)
