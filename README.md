@@ -5,14 +5,14 @@ Demo [link](https://sam-the-tutor.github.io/celo-HospitalApp/)
 
 #### Description
 This is a very simple hospital dapp where:
-1. patients who need help can be registered, so as they recieve donations.
-2. hospitals can organize fundraising for their projects.
-3. well-wishers can contribute to hospital projects
-4. well-wishers can pay for the patient's needs.
-5. only whitelisted accounts can register patients or create fundraising projects
+1. Patients who need help can be registered, so as they recieve donations.
+2. Hospitals can organize fundraising for their projects.
+3. Well-wishers can contribute to hospital projects
+4. Well-wishers can pay for the patient's needs.
+5. Only whitelisted accounts can register patients or create fundraising projects
 6. A project or patient can be deleted if the owner wishes to.
-7. funded projects close automatically.
-8.patients who recieve their full donations are delisted automatically.
+7. Funded projects close automatically.
+8. Patients who recieve their full donations are delisted automatically.
 
 
 
